@@ -1,3 +1,5 @@
+history.scrollRestoration = "manual";
+
 const stops = [
     {
         "code": 16991,
