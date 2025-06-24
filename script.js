@@ -30,7 +30,7 @@ const stops = [
 const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
 const dateToTime = (dateObj) => {
-    const p = x => dateObj[`get${x}`]().toString().padStart(2, "0");
+    const p = x => (dateObj[`getUTC${x}`]()+(x==="Hours"?8:0)).toString().padStart(2, "0");
     return `${p("Hours")}:${p("Minutes")}:${p("Seconds")}`;
 }
 
@@ -100,8 +100,8 @@ const loadData = async () => {
         const data = await getArrData(stop.code);
         console.log(data);
 
-        if (!data || !stopBox) {
-            alert("Something went wrong! Check your network connection.");
+        if (!data) {
+            alert("Something went wrong! Check your network connection. (Or you might be reloading too fast.)");
             return false;
         }
 
@@ -154,7 +154,7 @@ const loadData = async () => {
         }
     }
 
-    document.querySelector("#last-update").textContent = "Last updated " + dateToTime(new Date());
+    document.querySelector("#last-update").textContent = "Last updated " + dateToTime(new Date()) + " SGT";
 }
 
 initPage();

@@ -50,7 +50,7 @@
 
 .seat { border-color: #00ff00; }
 .stand { border-color: #ffff00; }
-.limited { border-color: #ff0000; }
+.no { border-color: #ff0000; }
 
 .service-holder {
     display: flex;
@@ -67,16 +67,18 @@
     margin-bottom: .5em;
 }
 
-@media (prefers-color-scheme: dark) {
-    a {
-        color: #00ffff;
-    }
-} 
+a {
+    color: #00ffff;
+}
 
 @media (prefers-color-scheme: light) {
+    a {
+        color: #0000ee;
+    }
+
     .seat { border-color: #008800; }
     .stand { border-color: #ffbf00; }
-    .limited { border-color: #ff0000; }
+    .no { border-color: #ff0000; }
 }
 
 
@@ -84,4 +86,8 @@ a:visited { color: auto; }
 
 section > :first-child {
     margin-top: 0;
+}
+
+.grey, .grey a {
+    color: #888888;
 }
