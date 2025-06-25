@@ -5,27 +5,64 @@ const stops = [
         "code": 16991,
         "name": "Opp Nan Hua High Sch",
         "shortName": "Front Gate",
-        "road": "Clementi Ave 1"
+        "road": "Clementi Ave 1",
+        "services": [
+            "189"
+        ]
     },
     {
         "code": 17191,
         "name": "NUS High Sch",
         "shortName": "Back Gate (Near)",
-        "road": "AYE Slip Road"
+        "road": "AYE Slip Road",
+        "services": [
+            "188",
+            "189",
+            "196"
+        ]
     },
     {
         "code": 17129,
         "name": "Aft NUS High Sch",
         "shortName": "Back Gate (Middle)",
-        "road": "AYE (City)"
+        "road": "AYE (City)",
+        "services": [
+            "197",
+            "198",
+            "97",
+            "97e",
+            "963"
+        ]
     },
     {
         "code": 17121,
         "name": "Blk 610",
         "shortName": "Back Gate (Far)",
-        "road": "AYE (Tuas)"
+        "road": "AYE (Tuas)",
+        "services": [
+            "97",
+            "97e",
+            "188",
+            "196",
+            "197",
+            "198",
+            "963"
+        ]
     }
 ];
+
+const sortBySvcRaw = (a, b) => {
+    const toUniqueOrder = numberStr => {
+        numberStr = numberStr.toString().trim();
+        const svcNumberOnly = +numberStr.match(/^\d+/)[0];
+        return svcNumberOnly * 27 + alphabet.indexOf(numberStr.slice(svcNumberOnly.toString().length).toLowerCase() || "*") + 1;
+    }
+    return toUniqueOrder(a) - toUniqueOrder(b);
+}
+
+const sortBySvc = (a, b) => {
+    return sortBySvcRaw(a.no, b.no);
+}
 
 const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
@@ -37,7 +74,7 @@ const dateToTime = (dateObj) => {
 const getArrData = async (stopCode) => {
     if (typeof stopCode !== "number") return false;
 
-    return await fetch(`https://arrivelah2.busrouter.sg/?id=${stopCode}`)
+    return await fetch(`https://arrivelah2.busrouter.sg/?id=${stopCode}`, {"cache": "reload"})
     .then(x => x.json())
     .catch(() => false);
 }
@@ -47,6 +84,7 @@ const newElem = x => document.createElement(x);
 const initPage = () => {
     const mainContainer = document.querySelector("#bus-timings");
     for (let stop of stops) {
+        if (document.querySelector(`[data-stop-id="${stop.code}"]`)) continue;
         const stopDiv = document.createElement("div");
         stopDiv.dataset.stopId = stop.code;
         stopDiv.classList.add("stop-container");
@@ -74,10 +112,34 @@ const initPage = () => {
 
         const svcHolder = newElem("div");
         svcHolder.classList.add("service-holder");
-        const tempLoading = newElem("span");
+        /* const tempLoading = newElem("span");
         tempLoading.classList.add("italic", "temp-loading");
         tempLoading.textContent = "Loading...";
-        svcHolder.append(tempLoading);
+        svcHolder.append(tempLoading); */
+
+        for (let svc of stop.services.toSorted(sortBySvcRaw)) {
+            if (!svcHolder.querySelector(`:scope [data-service="${svc}"]`)) {
+                const svcCont = document.createElement("div");
+                svcCont.classList.add("service-container");
+                svcCont.dataset.service = svc;
+
+                const svcId = document.createElement("span");
+                svcId.classList.add("service-id");
+                svcId.textContent = svc;
+
+                svcCont.append(svcId);
+
+                for (let i=1; i<=3; i++) {
+                    const timeBox = document.createElement("span");
+                    timeBox.classList.add("time-indicator");
+                    timeBox.textContent = "";
+                    timeBox.dataset.busCount = ["next", "next2", "next3"][i - 1];
+                    svcCont.append(timeBox);
+                }
+
+                svcHolder.append(svcCont);
+            }
+        }
 
         stopDiv.append(stopHeader, svcHolder);
         mainContainer.append(stopDiv);
@@ -105,16 +167,19 @@ const loadData = async () => {
             return false;
         }
 
-        svcHolder.querySelector(":scope .temp-loading")?.remove();
+        // svcHolder.querySelector(":scope .temp-loading")?.remove();
 
-        for (let svc of data.services) {
-            const svcNumberOnly = +svc.no.match(/^\d+/)[0];
+        const dataSource = stop.services.length > 0 ? stop.services.toSorted(sortBySvcRaw) : data.services.toSorted(sortBySvc).map(x => x.no);
+        
 
-            if (!svcHolder.querySelector(`:scope [data-service="${svc.no}"]`)) {
+        for (let svc of dataSource) {
+            console.log(svc);
+
+            /* if (svcHolder.querySelector(`:scope a [data-service="${svc.no}"]`)) {
                 const svcCont = document.createElement("div");
                 svcCont.classList.add("service-container");
                 svcCont.dataset.service = svc.no;
-                svcCont.style.order = svcNumberOnly * 27 + alphabet.indexOf(svc.no.slice(svcNumberOnly.length)) + 1;
+                // svcCont.style.order = svcNumberOnly * 27 + alphabet.indexOf(svc.no.slice(svcNumberOnly.toString().length).toLowerCase() || "*") + 1;
 
                 const svcId = document.createElement("span");
                 svcId.classList.add("service-id");
@@ -131,25 +196,41 @@ const loadData = async () => {
                 }
 
                 svcHolder.append(svcCont);
-            }
+            } */
 
-            const svcCont = svcHolder.querySelector(`:scope [data-service="${svc.no}"]`);
+            const svcCont = svcHolder.querySelector(`:scope [data-service="${svc}"]`);
+
+            /* for (let i=1; i<=3; i++) {
+                const busCountId = ["next", "next2", "next3"][i - 1];
+                if (svcCont.querySelector(`:scope [data-bus-count=${busCountId}]`)) continue;
+
+                const timeBox = document.createElement("span");
+                timeBox.classList.add("time-indicator");
+                timeBox.textContent = "N/A";
+                timeBox.dataset.busCount = ["next", "next2", "next3"][i - 1];
+                svcCont.append(timeBox);
+            } */
 
             for (let key of ["next", "next2", "next3"]) {
                 const indicator = svcCont.querySelector(`:scope [data-bus-count=${key}]`);
-                if (!svc[key]?.time) {
+                const svcArrData = data.services.find(x => x.no === svc);
+                if (!svcArrData?.[key]?.time) {
                     setClass(indicator, "");
+                    indicator.classList.add("no-data");
+                    indicator.textContent = "N/A"
                     continue;
                 }
 
-                const comingTime = new Date(svc[key].time);
+                indicator.classList.remove("no-data")
+
+                const comingTime = new Date(svcArrData[key].time);
                 const offset = milToMins(Math.max(comingTime - new Date(), 0));
 
                 indicator.textContent = ((offset === 0) ? "Arr" : `${offset} min`);
 
-                indicator.classList.toggle("unmonitored-schedule", !!svc[key].monitored);
+                indicator.classList.toggle("unmonitored-schedule", !svcArrData[key].monitored);
                 
-                setClass(indicator, {"SEA":"seat","SDA":"stand","LSD":"no"}[svc[key].load]);
+                setClass(indicator, {"SEA":"seat","SDA":"stand","LSD":"no"}[svcArrData[key].load]);
             }
         }
     }

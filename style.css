@@ -48,6 +48,10 @@
     border-bottom-style: dashed;
 }
 
+.no-data {
+    border-bottom-style: dotted;
+}
+
 .seat { border-color: #00ff00; }
 .stand { border-color: #ffff00; }
 .no { border-color: #ff0000; }
