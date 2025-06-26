@@ -67,8 +67,8 @@ const sortBySvc = (a, b) => {
 const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
 const dateToTime = (dateObj) => {
-    const p = x => ((dateObj[`getUTC${x}`]()+(x==="Hours"?8:0))%24).toString().padStart(2, "0");
-    return `${p("Hours")}:${p("Minutes")}:${p("Seconds")}`;
+    const p = x=> x.toString().padStart(2, "0");
+    return `${p((dateObj.getUTCHours()+8)%24)}:${p(dateObj.getMinutes())}:${p(dateObj.getSeconds())}`;
 }
 
 const getArrData = async (stopCode) => {
