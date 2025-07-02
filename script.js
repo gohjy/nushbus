@@ -11,6 +11,18 @@ const stops = [
         ]
     },
     {
+        "code": 17091,
+        "name": "Aft Clementi Ave 1",
+        "shortName": "Front Gate (Far)",
+        "road": "Clementi Rd",
+        "services": [
+            "96",
+            "96B",
+            "151",
+            "183"
+        ]
+    },
+    {
         "code": 17191,
         "name": "NUS High Sch",
         "shortName": "Back Gate (Near)",
